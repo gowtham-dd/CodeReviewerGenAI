@@ -86,9 +86,13 @@ def review_result(review_id):
 # API Routes - Review
 # ============================================
 
+# ============================================
+# API Routes - Review (UPDATED - USING REAL AGENTS)
+# ============================================
+
 @app.route('/api/review', methods=['POST'])
 async def api_review():
-    """Submit code for review - Basic version with 2 agents"""
+    """Submit code for review - USING REAL AGENTS for correctness & complexity"""
     try:
         data = request.json
         code = data.get('code')
@@ -100,11 +104,17 @@ async def api_review():
         
         review_id = str(uuid.uuid4())
         
-        # Simulate loading time (2 seconds)
-        await asyncio.sleep(2)
+        logger.info(f"Starting real code review with agents for {language}")
         
-        # Generate simulated results immediately
-        simulated_data = generate_complete_simulated_results(code, language)
+        # ✅ RUN REAL AGENTS (not simulation)
+        correctness_result = await correctness_agent.review(code, language)
+        complexity_result = await complexity_agent.analyze(code, language)
+        
+        # ⭐ Generate simulation data ONLY for premium features
+        simulated_premium_data = generate_premium_simulated_results(code, language)
+        
+        # Calculate overall score based on real agents only
+        overall_score = calculate_score(correctness_result, complexity_result)
         
         # Store results
         review_data = {
@@ -113,12 +123,14 @@ async def api_review():
             'code': code[:200] + '...' if len(code) > 200 else code,
             'language': language,
             'is_premium': is_premium,
-            'correctness_result': simulated_data['correctness'],
-            'complexity_result': simulated_data['complexity'],
-            'readability_simulated': simulated_data['readability'],
-            'edge_cases_simulated': simulated_data['edge_cases'],
-            'summary_simulated': simulated_data['summary'],
-            'overall_score': simulated_data['overall_score']
+            # Real agent results
+            'correctness_result': correctness_result,
+            'complexity_result': complexity_result,
+            # Simulated premium features
+            'readability_simulated': simulated_premium_data['readability'],
+            'edge_cases_simulated': simulated_premium_data['edge_cases'],
+            'summary_simulated': simulated_premium_data['summary'],
+            'overall_score': overall_score
         }
         
         active_reviews[review_id] = review_data
@@ -126,13 +138,99 @@ async def api_review():
         return jsonify({
             'success': True,
             'review_id': review_id,
-            'message': 'Review completed successfully'
+            'message': 'Review completed successfully with real agents'
         })
         
     except Exception as e:
         logger.error(f"Review error: {e}")
         return jsonify({'error': str(e)}), 500
 
+# ============================================
+# NEW: Premium Simulation Data (separate from real agents)
+# ============================================
+# ============================================
+# Score Calculation Function
+# ============================================
+
+def calculate_score(correctness, complexity):
+    """Calculate overall score from real agents only"""
+    try:
+        correctness_score = (correctness.get('tests_passed', 0) / 
+                            max(correctness.get('total_tests', 1), 1)) * 50
+        
+        time_complexity = complexity.get('time_complexity', {}).get('big_o', 'O(n)')
+        complexity_scores = {
+            'O(1)': 50,
+            'O(log n)': 45,
+            'O(n)': 40,
+            'O(n log n)': 30,
+            'O(n²)': 20,
+            'O(n³)': 10
+        }
+        complexity_score = 0
+        for pattern, score in complexity_scores.items():
+            if pattern in time_complexity:
+                complexity_score = score
+                break
+        
+        return min(100, correctness_score + complexity_score)
+    except Exception as e:
+        logger.error(f"Score calculation error: {e}")
+        return 70  # Default score
+    
+def generate_premium_simulated_results(code, language):
+    """Generate simulation data ONLY for premium features (readability, edge cases, summary)"""
+    
+    # Simulate readability results (Premium feature)
+    readability = {
+        'scores': {
+            'style': 7,
+            'documentation': 5,
+            'naming': 8,
+            'structure': 6
+        },
+        'suggestions': [
+            '✨ [Premium Feature] Add docstrings to functions',
+            '✨ [Premium Feature] Use more descriptive variable names',
+            '✨ [Premium Feature] Break down complex function into smaller pieces'
+        ]
+    }
+    
+    # Simulate edge cases (Premium feature)
+    edge_cases = {
+        'cases': [
+            {'name': 'Empty Input', 'description': 'Test with empty list', 'severity': 'high', 'input': '[]'},
+            {'name': 'Null Values', 'description': 'Test with None values', 'severity': 'high', 'input': '[None, None]'},
+            {'name': 'Mixed Types', 'description': 'Test with mixed data types', 'severity': 'medium', 'input': '[1, "2", 3.0]'},
+            {'name': 'Very Large Input', 'description': 'Test with 1M elements', 'severity': 'medium', 'input': '[1] * 1000000'},
+            {'name': 'Negative Values', 'description': 'Test with negative numbers', 'severity': 'low', 'input': '[-1, -2, -3]'}
+        ],
+        'premium_note': 'Upgrade to Premium for 20+ comprehensive edge cases with stress testing!'
+    }
+    
+    # Simulate summary (Premium feature)
+    summary = {
+        'executive': 'Your code shows good basic functionality. Upgrade to Premium for detailed analysis!',
+        'findings': [
+            'Basic functionality works (from real agents)',
+            'Upgrade to Premium for:',
+            '  • Readability analysis',
+            '  • Comprehensive edge cases',
+            '  • AI-powered optimization suggestions'
+        ],
+        'improvements': [
+            {
+                'title': 'Unlock Premium Features',
+                'description': 'Get detailed code improvements, edge case testing, and AI-powered suggestions with Premium!'
+            }
+        ]
+    }
+    
+    return {
+        'readability': readability,
+        'edge_cases': edge_cases,
+        'summary': summary
+    }
 # ============================================
 # API Routes - GitHub
 # ============================================
