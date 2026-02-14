@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+
+{% block title %}Review Code - AI Code Reviewer{% endblock %}
+
+{% block content %}
+<div class="glass-morphism p-8">
+    <h1 class="text-3xl font-bold mb-8 gradient-text">Review Your Code</h1>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Code Input Section -->
+        <div class="bg-white rounded-lg p-6 shadow">
+            <h2 class="text-xl font-semibold mb-4">Paste Your Code</h2>
+            
+            <!-- Language Selector -->
+            <div class="mb-4">
+                <label class="block text-gray-700 mb-2">Programming Language</label>
+                <select id="language" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-indigo-500">
+                    <option value="python">Python</option>
+                    <option value="javascript">JavaScript</option>
+                    <option value="java">Java</option>
+                    <option value="cpp">C++</option>
+                    <option value="go">Go</option>
+                    <option value="rust">Rust</option>
+                </select>
+            </div>
+            
+            <!-- Code Editor -->
+            <div class="code-editor mb-4">
+                <textarea id="code-editor" name="code"></textarea>
+            </div>
+            
+            <!-- Options -->
+            <div class="mb-4 space-y-2">
+                <label class="flex items-center">
+                    <input type="checkbox" id="plagiarism-check" class="mr-2" checked>
+                    <span>Enable Plagiarism Detection</span>
+                </label>
+                <label class="flex items-center">
+                    <input type="checkbox" id="deep-analysis" class="mr-2" checked>
+                    <span>Deep Analysis (includes edge cases & stress testing)</span>
+                </label>
+            </div>
+            
+            <!-- Submit Button -->
+            <button onclick="submitCode()" class="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition flex items-center justify-center">
+                <i class="fas fa-play mr-2"></i>
+                Start Review
+            </button>
+        </div>
+        
+        <!-- Instructions & Tips -->
+        <div class="bg-white rounded-lg p-6 shadow">
+            <h2 class="text-xl font-semibold mb-4">Tips for Best Results</h2>
+            
+            <div class="space-y-4">
+                <div class="flex items-start">
+                    <div class="text-green-500 mr-3">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold">Complete Functions</h3>
+                        <p class="text-gray-600 text-sm">Include entire functions or classes for better analysis</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-start">
+                    <div class="text-green-500 mr-3">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold">Add Comments</h3>
+                        <p class="text-gray-600 text-sm">Comments help the readability agent provide better feedback</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-start">
+                    <div class="text-green-500 mr-3">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold">Include Imports</h3>
+                        <p class="text-gray-600 text-sm">Include all necessary imports for accurate dependency analysis</p>
+                    </div>
+                </div>
+                
+                <div class="border-t pt-4 mt-4">
+                    <h3 class="font-semibold mb-2">What You'll Get:</h3>
+                    <ul class="space-y-2 text-sm text-gray-600">
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>Test results with pass/fail metrics</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>Time & space complexity analysis</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>Code style and best practices review</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>Edge case generation and testing</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>Optimized code suggestions</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i>Plagiarism check (AST + embeddings)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Loading Modal (hidden by default) -->
+    <div id="loading-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 text-center">
+            <div class="loader mx-auto mb-4"></div>
+            <h3 class="text-xl font-semibold mb-2">Analyzing Your Code</h3>
+            <p class="text-gray-600 mb-2">Our 5 AI agents are reviewing your code...</p>
+            <div class="text-sm text-gray-500">
+                <p>Agent 1: Running tests...</p>
+                <p>Agent 2: Analyzing complexity...</p>
+                <p>Agent 3: Checking readability...</p>
+                <p>Agent 4: Generating edge cases...</p>
+                <p>Agent 5: Preparing summary...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Initialize CodeMirror editor
+const editor = CodeMirror.fromTextArea(document.getElementById('code-editor'), {
+    lineNumbers: true,
+    mode: 'python',
+    theme: 'dracula',
+    autoCloseBrackets: true,
+    matchBrackets: true,
+    indentUnit: 4,
+    tabSize: 4,
+    lineWrapping: true,
+    height: '400px'
+});
+
+// Set editor height
+editor.setSize('100%', '400px');
+
+// Update mode when language changes
+document.getElementById('language').addEventListener('change', function(e) {
+    const mode = {
+        'python': 'python',
+        'javascript': 'javascript',
+        'java': 'text/x-java',
+        'cpp': 'text/x-c++src',
+        'go': 'text/x-go',
+        'rust': 'text/x-rustsrc'
+    }[e.target.value];
+    editor.setOption('mode', mode);
+});
+
+function submitCode() {
+    const code = editor.getValue();
+    if (!code.trim()) {
+        alert('Please paste some code to review');
+        return;
+    }
+    
+    // Show loading modal
+    document.getElementById('loading-modal').classList.remove('hidden');
+    document.getElementById('loading-modal').classList.add('flex');
+    
+    // Prepare data
+    const data = {
+        code: code,
+        language: document.getElementById('language').value,
+        plagiarism_check: document.getElementById('plagiarism-check').checked,
+        deep_analysis: document.getElementById('deep-analysis').checked
+    };
+    
+    // Send to backend
+    fetch('/api/review', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        window.location.href = `/review/result/${data.review_id}`;
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred during review');
+        document.getElementById('loading-modal').classList.add('hidden');
+    });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}AI Code Reviewer - Home{% endblock %}
+
+{% block content %}
+<div class="glass-morphism p-8">
+    <!-- Hero Section -->
+    <div class="text-center mb-12">
+        <h1 class="text-5xl font-bold mb-4">
+            <span class="gradient-text">AI-Powered Code Review</span>
+        </h1>
+        <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+            Experience the future of code review with our multi-agent AI system. 
+            Get comprehensive feedback on correctness, complexity, readability, and more.
+        </p>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        <div class="bg-white rounded-lg p-6 text-center shadow-lg">
+            <div class="text-4xl text-indigo-600 mb-2">
+                <i class="fas fa-robot"></i>
+            </div>
+            <div class="text-3xl font-bold text-gray-800">5</div>
+            <div class="text-gray-600">Specialized AI Agents</div>
+        </div>
+        <div class="bg-white rounded-lg p-6 text-center shadow-lg">
+            <div class="text-4xl text-indigo-600 mb-2">
+                <i class="fas fa-code-branch"></i>
+            </div>
+            <div class="text-3xl font-bold text-gray-800">10+</div>
+            <div class="text-gray-600">Languages Supported</div>
+        </div>
+        <div class="bg-white rounded-lg p-6 text-center shadow-lg">
+            <div class="text-4xl text-indigo-600 mb-2">
+                <i class="fas fa-tachometer-alt"></i>
+            </div>
+            <div class="text-3xl font-bold text-gray-800">&lt; 30s</div>
+            <div class="text-gray-600">Average Review Time</div>
+        </div>
+    </div>
+
+    <!-- Features Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+        <div class="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition">
+            <div class="text-3xl text-indigo-600 mb-3">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h3 class="text-xl font-semibold mb-2">Agent 1: Correctness</h3>
+            <p class="text-gray-600">Runs comprehensive test cases and validates code functionality</p>
+        </div>
+        
+        <div class="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition">
+            <div class="text-3xl text-indigo-600 mb-3">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <h3 class="text-xl font-semibold mb-2">Agent 2: Complexity</h3>
+            <p class="text-gray-600">Analyzes time & space complexity with visual explanations</p>
+        </div>
+        
+        <div class="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition">
+            <div class="text-3xl text-indigo-600 mb-3">
+                <i class="fas fa-book-open"></i>
+            </div>
+            <h3 class="text-xl font-semibold mb-2">Agent 3: Readability</h3>
+            <p class="text-gray-600">Reviews code style, best practices, and documentation</p>
+        </div>
+        
+        <div class="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition">
+            <div class="text-3xl text-indigo-600 mb-3">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h3 class="text-xl font-semibold mb-2">Agent 4: Edge Cases</h3>
+            <p class="text-gray-600">Generates edge cases and stress tests your code</p>
+        </div>
+        
+        <div class="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition">
+            <div class="text-3xl text-indigo-600 mb-3">
+                <i class="fas fa-comment-dots"></i>
+            </div>
+            <h3 class="text-xl font-semibold mb-2">Agent 5: Summarizer</h3>
+            <p class="text-gray-600">Provides human-like explanations and improvement suggestions</p>
+        </div>
+        
+        <div class="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition">
+            <div class="text-3xl text-indigo-600 mb-3">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <h3 class="text-xl font-semibold mb-2">Plagiarism Detection</h3>
+            <p class="text-gray-600">AST-based similarity detection and embedding comparison</p>
+        </div>
+    </div>
+
+    <!-- CTA Section -->
+    <div class="text-center">
+        <h2 class="text-3xl font-bold mb-4">Ready to improve your code?</h2>
+        <div class="space-x-4">
+            <a href="/review" class="inline-block bg-indigo-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition">
+                <i class="fas fa-paste mr-2"></i>Paste Code
+            </a>
+            <a href="/github" class="inline-block bg-purple-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-purple-700 transition">
+                <i class="fab fa-github mr-2"></i>Analyze GitHub Repo
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

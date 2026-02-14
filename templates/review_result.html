@@ -1,0 +1,295 @@
+{% extends "base.html" %}
+
+{% block title %}Review Results - AI Code Reviewer{% endblock %}
+
+{% block content %}
+<div class="glass-morphism p-8">
+    <!-- Header with Score -->
+    <div class="flex justify-between items-start mb-8">
+        <div>
+            <h1 class="text-3xl font-bold gradient-text mb-2">Code Review Results</h1>
+            <p class="text-gray-600">Review ID: #{{ review_id }} • {{ timestamp }}</p>
+        </div>
+        <div class="text-center">
+            <div class="text-5xl font-bold text-indigo-600">{{ overall_score }}%</div>
+            <div class="text-gray-600">Overall Score</div>
+        </div>
+    </div>
+    
+    <!-- Quick Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+        <div class="bg-white rounded-lg p-4 text-center shadow">
+            <div class="text-2xl font-bold text-green-600">{{ stats.tests_passed }}/{{ stats.total_tests }}</div>
+            <div class="text-sm text-gray-600">Tests Passed</div>
+        </div>
+        <div class="bg-white rounded-lg p-4 text-center shadow">
+            <div class="text-2xl font-bold text-blue-600">{{ stats.time_complexity }}</div>
+            <div class="text-sm text-gray-600">Time Complexity</div>
+        </div>
+        <div class="bg-white rounded-lg p-4 text-center shadow">
+            <div class="text-2xl font-bold text-purple-600">{{ stats.space_complexity }}</div>
+            <div class="text-sm text-gray-600">Space Complexity</div>
+        </div>
+        <div class="bg-white rounded-lg p-4 text-center shadow">
+            <div class="text-2xl font-bold text-yellow-600">{{ stats.issues }}</div>
+            <div class="text-sm text-gray-600">Issues Found</div>
+        </div>
+        <div class="bg-white rounded-lg p-4 text-center shadow">
+            <div class="text-2xl font-bold text-red-600">{{ stats.edge_cases }}</div>
+            <div class="text-sm text-gray-600">Edge Cases</div>
+        </div>
+    </div>
+    
+    <!-- Agent Reports Tabs -->
+    <div class="bg-white rounded-lg shadow mb-8">
+        <div class="border-b">
+            <nav class="flex space-x-8 px-6" aria-label="Tabs">
+                <button onclick="showTab('correctness')" class="tab-button active py-4 px-1 border-b-2 border-indigo-500 font-medium text-indigo-600">Correctness</button>
+                <button onclick="showTab('complexity')" class="tab-button py-4 px-1 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700">Complexity</button>
+                <button onclick="showTab('readability')" class="tab-button py-4 px-1 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700">Readability</button>
+                <button onclick="showTab('edgecases')" class="tab-button py-4 px-1 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700">Edge Cases</button>
+                <button onclick="showTab('summary')" class="tab-button py-4 px-1 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700">Summary</button>
+            </nav>
+        </div>
+        
+        <!-- Tab Contents -->
+        <div class="p-6">
+            <!-- Agent 1: Correctness -->
+            <div id="tab-correctness" class="tab-content">
+                <h3 class="text-lg font-semibold mb-4">Test Results</h3>
+                <div class="space-y-3">
+                    {% for test in correctness.tests %}
+                    <div class="flex items-center p-3 {% if test.passed %}bg-green-50{% else %}bg-red-50{% endif %} rounded">
+                        <i class="fas {% if test.passed %}fa-check-circle text-green-500{% else %}fa-times-circle text-red-500{% endif %} mr-3"></i>
+                        <div class="flex-1">
+                            <span class="font-medium">{{ test.name }}</span>
+                            <p class="text-sm text-gray-600">{{ test.description }}</p>
+                        </div>
+                        {% if not test.passed %}
+                        <span class="text-sm text-red-600">{{ test.error }}</span>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+         <!-- Agent 2: Complexity -->
+<div id="tab-complexity" class="tab-content hidden">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+            <h3 class="text-lg font-semibold mb-4">Time Complexity Analysis</h3>
+            <div class="bg-gray-50 p-4 rounded">
+                {% set time_data = complexity.time_complexity or {} %}
+                <div class="text-2xl font-bold text-indigo-600 mb-2">{{ time_data.big_o or 'O(n)' }}</div>
+                <p class="text-gray-600">{{ time_data.explanation or 'Linear time complexity' }}</p>
+            </div>
+            
+            <h4 class="font-semibold mt-4 mb-2">Hotspots:</h4>
+            <ul class="space-y-2">
+                {% for hotspot in complexity.hotspots or [] %}
+                <li class="text-sm bg-yellow-50 p-2 rounded">
+                    Line {{ hotspot.line }}: {{ hotspot.function }} (complexity: {{ hotspot.complexity }})
+                </li>
+                {% else %}
+                <li class="text-sm text-gray-500">No hotspots detected</li>
+                {% endfor %}
+            </ul>
+        </div>
+        
+        <div>
+            <h3 class="text-lg font-semibold mb-4">Space Complexity Analysis</h3>
+            <div class="bg-gray-50 p-4 rounded">
+                {% set space_data = complexity.space_complexity or {} %}
+                <div class="text-2xl font-bold text-purple-600 mb-2">{{ space_data.big_o or 'O(n)' }}</div>
+                <p class="text-gray-600">{{ space_data.explanation or 'Linear space complexity' }}</p>
+            </div>
+            
+            <h4 class="font-semibold mt-4 mb-2">Suggestions:</h4>
+            <ul class="space-y-2">
+                {% for suggestion in complexity.suggestions or [] %}
+                <li class="text-sm bg-blue-50 p-2 rounded">
+                    <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
+                    {{ suggestion }}
+                </li>
+                {% else %}
+                <li class="text-sm text-gray-500">No suggestions available</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+            <!-- Agent 3: Readability -->
+            <div id="tab-readability" class="tab-content hidden">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="text-center p-4 bg-gray-50 rounded">
+                        <div class="text-2xl font-bold text-indigo-600">{{ readability.scores.style }}/10</div>
+                        <div class="text-sm text-gray-600">Code Style</div>
+                    </div>
+                    <div class="text-center p-4 bg-gray-50 rounded">
+                        <div class="text-2xl font-bold text-indigo-600">{{ readability.scores.documentation }}/10</div>
+                        <div class="text-sm text-gray-600">Documentation</div>
+                    </div>
+                    <div class="text-center p-4 bg-gray-50 rounded">
+                        <div class="text-2xl font-bold text-indigo-600">{{ readability.scores.naming }}/10</div>
+                        <div class="text-sm text-gray-600">Naming</div>
+                    </div>
+                </div>
+                
+                <h3 class="font-semibold mb-2">Suggestions:</h3>
+                <ul class="space-y-2">
+                    {% for suggestion in readability.suggestions %}
+                    <li class="flex items-start p-2 hover:bg-gray-50 rounded">
+                        <i class="fas fa-lightbulb text-yellow-500 mr-2 mt-1"></i>
+                        <span>{{ suggestion }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            
+            <!-- Agent 4: Edge Cases -->
+            <div id="tab-edgecases" class="tab-content hidden">
+                <h3 class="text-lg font-semibold mb-4">Generated Test Cases</h3>
+                
+                <div class="space-y-4">
+                    {% for case in edge_cases.cases %}
+                    <div class="border rounded p-4">
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="font-medium text-indigo-600">{{ case.name }}</h4>
+                            <span class="px-2 py-1 text-xs rounded {% if case.severity == 'critical' %}bg-red-100 text-red-800{% elif case.severity == 'high' %}bg-orange-100 text-orange-800{% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                                {{ case.severity|upper }}
+                            </span>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-2">{{ case.description }}</p>
+                        <div class="bg-gray-50 p-2 rounded">
+                            <code class="text-sm">{{ case.input }}</code>
+                        </div>
+                        {% if case.expected_output %}
+                        <div class="mt-2 text-sm">
+                            <span class="font-medium">Expected: </span>
+                            <code>{{ case.expected_output }}</code>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                {% if edge_cases.stress_test %}
+                <div class="mt-6">
+                    <h3 class="text-lg font-semibold mb-2">Stress Test Results</h3>
+                    <div class="bg-gray-50 p-4 rounded">
+                        <p><span class="font-medium">Max Input Size:</span> {{ edge_cases.stress_test.max_input }}</p>
+                        <p><span class="font-medium">Execution Time:</span> {{ edge_cases.stress_test.execution_time }}ms</p>
+                        <p><span class="font-medium">Memory Used:</span> {{ edge_cases.stress_test.memory }}MB</p>
+                        <p><span class="font-medium">Status:</span> 
+                            <span class="{% if edge_cases.stress_test.passed %}text-green-600{% else %}text-red-600{% endif %}">
+                                {{ edge_cases.stress_test.status }}
+                            </span>
+                        </p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Agent 5: Summary -->
+            <div id="tab-summary" class="tab-content hidden">
+                <div class="prose max-w-none">
+                    <div class="bg-indigo-50 p-6 rounded-lg mb-6">
+                        <h3 class="text-xl font-semibold text-indigo-800 mb-2">Executive Summary</h3>
+                        <p class="text-gray-700">{{ summary.executive }}</p>
+                    </div>
+                    
+                    <h3 class="font-semibold text-lg mb-2">Key Findings</h3>
+                    <ul class="list-disc pl-5 mb-4">
+                        {% for finding in summary.findings %}
+                        <li class="mb-1">{{ finding }}</li>
+                        {% endfor %}
+                    </ul>
+                    
+                    <h3 class="font-semibold text-lg mb-2">Recommended Improvements</h3>
+                    <div class="space-y-3">
+                        {% for improvement in summary.improvements %}
+                        <div class="bg-green-50 p-3 rounded">
+                            <p class="font-medium">{{ improvement.title }}</p>
+                            <p class="text-sm text-gray-600">{{ improvement.description }}</p>
+                            {% if improvement.code_example %}
+                            <pre class="mt-2 bg-gray-800 text-white p-2 rounded text-sm overflow-x-auto"><code>{{ improvement.code_example }}</code></pre>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    {% if summary.optimized_code %}
+                    <div class="mt-6">
+                        <h3 class="font-semibold text-lg mb-2">Optimized Version</h3>
+                        <pre class="bg-gray-800 text-white p-4 rounded-lg overflow-x-auto"><code>{{ summary.optimized_code }}</code></pre>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Plagiarism Report (if enabled) -->
+    {% if plagiarism %}
+    <div class="bg-white rounded-lg p-6 shadow mb-8">
+        <h2 class="text-xl font-semibold mb-4">Plagiarism Check</h2>
+        <div class="flex items-center justify-between">
+            <div>
+                <span class="text-2xl font-bold {% if plagiarism.similarity < 20 %}text-green-600{% elif plagiarism.similarity < 50 %}text-yellow-600{% else %}text-red-600{% endif %}">
+                    {{ plagiarism.similarity }}%
+                </span>
+                <span class="text-gray-600 ml-2">similarity score</span>
+            </div>
+            {% if plagiarism.matches %}
+            <button onclick="showMatches()" class="text-indigo-600 hover:text-indigo-800">View matches</button>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Action Buttons -->
+    <div class="flex space-x-4">
+        <button onclick="exportReport()" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition">
+            <i class="fas fa-download mr-2"></i>Export Report
+        </button>
+        <button onclick="shareReport()" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">
+            <i class="fas fa-share mr-2"></i>Share
+        </button>
+        <button onclick="window.print()" class="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition">
+            <i class="fas fa-print mr-2"></i>Print
+        </button>
+    </div>
+</div>
+
+<script>
+function showTab(tabName) {
+    // Hide all tabs
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.add('hidden');
+    });
+    
+    // Show selected tab
+    document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+    
+    // Update button styles
+    document.querySelectorAll('.tab-button').forEach(button => {
+        button.classList.remove('active', 'border-indigo-500', 'text-indigo-600');
+        button.classList.add('border-transparent', 'text-gray-500');
+    });
+    
+    event.target.classList.add('active', 'border-indigo-500', 'text-indigo-600');
+    event.target.classList.remove('border-transparent', 'text-gray-500');
+}
+
+function exportReport() {
+    window.location.href = `/api/export/{{ review_id }}`;
+}
+
+function shareReport() {
+    // Create shareable link
+    const shareUrl = window.location.href;
+    navigator.clipboard.writeText(shareUrl);
+    alert('Link copied to clipboard!');
+}
+</script>
+{% endblock %}

@@ -1,0 +1,283 @@
+{% extends "base.html" %}
+
+{% block title %}GitHub Repo Analysis - AI Code Reviewer{% endblock %}
+
+{% block content %}
+<div class="glass-morphism p-8">
+    <h1 class="text-3xl font-bold mb-8 gradient-text">Analyze GitHub Repository</h1>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Main Input Section -->
+        <div class="lg:col-span-2 bg-white rounded-lg p-6 shadow">
+            <h2 class="text-xl font-semibold mb-4">Repository URL</h2>
+            
+            <div class="mb-6">
+                <input type="url" id="repo-url" placeholder="https://github.com/username/repository" 
+                       class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500">
+                <p class="text-sm text-gray-500 mt-2">Supports public repositories only</p>
+            </div>
+            
+            <!-- Analyze Button with Loading Spinner -->
+            <button onclick="analyzeRepo()" id="analyze-btn" class="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition flex items-center justify-center">
+                <span id="btn-text">Analyze Repository</span>
+                <span id="btn-spinner" class="hidden ml-2">
+                    <i class="fas fa-spinner fa-spin"></i>
+                </span>
+            </button>
+            
+            <!-- Status Container -->
+            <div id="status-container" class="mt-4 hidden">
+                <div id="analysis-status" class="p-4 rounded-lg flex items-center">
+                    <!-- Status will be inserted here -->
+                </div>
+            </div>
+            
+            <!-- Advanced Options -->
+            <div class="mt-6 mb-6">
+                <h3 class="font-semibold mb-3">Analysis Options</h3>
+                <div class="space-y-2">
+                    <label class="flex items-center">
+                        <input type="checkbox" id="include-tests" class="mr-2" checked>
+                        <span>Run existing tests (if available)</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="checkbox" id="deep-scan" class="mr-2" checked>
+                        <span>Deep scan all files</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="checkbox" id="dependency-check" class="mr-2" checked>
+                        <span>Analyze dependencies</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="checkbox" id="plagiarism-repo" class="mr-2" checked>
+                        <span>Plagiarism check against public repos</span>
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Branch Selection -->
+            <div class="mb-6">
+                <label class="block text-gray-700 mb-2">Branch/Tag</label>
+                <select id="branch" class="w-full p-2 border rounded-lg">
+                    <option value="main">main</option>
+                    <option value="master">master</option>
+                    <option value="develop">develop</option>
+                </select>
+            </div>
+        </div>
+        
+        <!-- Repo Preview & Info -->
+        <div class="bg-white rounded-lg p-6 shadow">
+            <h2 class="text-xl font-semibold mb-4">Repository Preview</h2>
+            <div id="repo-preview" class="text-center text-gray-500">
+                <i class="fab fa-github text-6xl mb-4"></i>
+                <p>Enter a GitHub URL to see preview</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Repo Analyses -->
+    <div class="mt-8 bg-white rounded-lg p-6 shadow">
+        <h2 class="text-xl font-semibold mb-4">Recent Repository Analyses</h2>
+        <div id="recent-analyses" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="text-center text-gray-500 col-span-3">
+                <p>No recent analyses</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Analyze GitHub repository function
+    async function analyzeRepo() {
+        const url = document.getElementById('repo-url')?.value;
+        if (!url) {
+            alert('Please enter a GitHub repository URL');
+            return;
+        }
+        
+        // Show loading state
+        const btn = document.getElementById('analyze-btn');
+        const btnText = document.getElementById('btn-text');
+        const btnSpinner = document.getElementById('btn-spinner');
+        const statusContainer = document.getElementById('status-container');
+        const statusDiv = document.getElementById('analysis-status');
+        
+        btn.disabled = true;
+        btnText.textContent = 'Analyzing...';
+        btnSpinner.classList.remove('hidden');
+        
+        // Show status
+        statusContainer.classList.remove('hidden');
+        statusDiv.className = 'p-4 bg-blue-50 text-blue-800 rounded-lg flex items-center';
+        statusDiv.innerHTML = `
+            <i class="fas fa-spinner fa-spin mr-3 text-xl"></i>
+            <div>
+                <p class="font-semibold">Generating simulation data...</p>
+                <p class="text-sm">This will take a few seconds</p>
+            </div>
+        `;
+        
+        try {
+            const response = await fetch('/api/analyze-repo', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    repo_url: url,
+                    branch: document.getElementById('branch')?.value || 'main',
+                    options: {
+                        include_tests: document.getElementById('include-tests')?.checked || true,
+                        deep_scan: document.getElementById('deep-scan')?.checked || true,
+                        dependency_check: document.getElementById('dependency-check')?.checked || true,
+                        plagiarism_check: document.getElementById('plagiarism-repo')?.checked || true
+                    }
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                statusDiv.className = 'p-4 bg-green-50 text-green-800 rounded-lg flex items-center';
+                statusDiv.innerHTML = `
+                    <i class="fas fa-check-circle text-green-500 mr-3 text-xl"></i>
+                    <div>
+                        <p class="font-semibold">Analysis complete!</p>
+                        <p class="text-sm">Redirecting to results...</p>
+                    </div>
+                `;
+                
+                // Show preview of simulation data
+                showSimulationPreview();
+                
+                setTimeout(() => {
+                    window.location.href = `/review/result/${result.review_id}`;
+                }, 1500);
+            } else {
+                throw new Error(result.error || 'Analysis failed');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            statusDiv.className = 'p-4 bg-red-50 text-red-800 rounded-lg flex items-center';
+            statusDiv.innerHTML = `
+                <i class="fas fa-exclamation-circle text-red-500 mr-3 text-xl"></i>
+                <div>
+                    <p class="font-semibold">Analysis failed</p>
+                    <p class="text-sm">${error.message || 'Please try again'}</p>
+                </div>
+            `;
+            
+            // Reset button
+            btn.disabled = false;
+            btnText.textContent = 'Analyze Repository';
+            btnSpinner.classList.add('hidden');
+        }
+    }
+    
+    // Show simulation data preview
+    function showSimulationPreview() {
+        const previewDiv = document.getElementById('repo-preview');
+        previewDiv.innerHTML = `
+            <div class="text-center">
+                <div class="inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-full mb-4">
+                    <i class="fas fa-chart-line text-4xl text-green-600"></i>
+                </div>
+                <h3 class="font-bold text-lg text-gray-800">Simulation Data Generated</h3>
+                <div class="grid grid-cols-2 gap-2 mt-4 text-sm">
+                    <div class="bg-indigo-50 p-2 rounded">
+                        <div class="font-semibold text-indigo-700">7/10</div>
+                        <div class="text-xs">Tests Passing</div>
+                    </div>
+                    <div class="bg-indigo-50 p-2 rounded">
+                        <div class="font-semibold text-indigo-700">O(n)</div>
+                        <div class="text-xs">Complexity</div>
+                    </div>
+                    <div class="bg-indigo-50 p-2 rounded">
+                        <div class="font-semibold text-indigo-700">72%</div>
+                        <div class="text-xs">Overall Score</div>
+                    </div>
+                    <div class="bg-indigo-50 p-2 rounded">
+                        <div class="font-semibold text-indigo-700">8</div>
+                        <div class="text-xs">Files Analyzed</div>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 mt-4">Redirecting to detailed results...</p>
+            </div>
+        `;
+    }
+    
+    // Preview repo info when URL changes
+    document.getElementById('repo-url').addEventListener('input', debounce(async function(e) {
+        const url = e.target.value;
+        const previewDiv = document.getElementById('repo-preview');
+        
+        if (!url) {
+            previewDiv.innerHTML = `
+                <i class="fab fa-github text-6xl mb-4"></i>
+                <p>Enter a GitHub URL to see preview</p>
+            `;
+            return;
+        }
+        
+        // Show loading
+        previewDiv.innerHTML = `
+            <div class="text-center">
+                <i class="fas fa-spinner fa-spin text-4xl text-indigo-600 mb-4"></i>
+                <p>Fetching repository info...</p>
+            </div>
+        `;
+        
+        try {
+            const response = await fetch(`/api/repo-info?url=${encodeURIComponent(url)}`);
+            const data = await response.json();
+            
+            if (data.error) {
+                previewDiv.innerHTML = `
+                    <div class="text-center text-red-500">
+                        <i class="fas fa-exclamation-circle text-6xl mb-4"></i>
+                        <p>${data.error}</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            previewDiv.innerHTML = `
+                <div class="text-center">
+                    <img src="${data.avatar_url}" class="w-20 h-20 rounded-full mx-auto mb-3 border-2 border-indigo-200">
+                    <h3 class="font-bold text-lg">${data.full_name}</h3>
+                    <p class="text-sm text-gray-600 mb-3">${data.description || 'No description'}</p>
+                    <div class="flex justify-center space-x-4 text-sm">
+                        <span class="flex items-center"><i class="fas fa-star text-yellow-500 mr-1"></i> ${data.stars}</span>
+                        <span class="flex items-center"><i class="fas fa-code-branch text-gray-500 mr-1"></i> ${data.forks}</span>
+                        <span class="flex items-center"><i class="fas fa-circle text-green-500 mr-1"></i> ${data.language}</span>
+                    </div>
+                    <div class="mt-3 text-xs text-gray-500">
+                        Default branch: ${data.default_branch}
+                    </div>
+                </div>
+            `;
+        } catch (error) {
+            previewDiv.innerHTML = `
+                <div class="text-center text-red-500">
+                    <i class="fas fa-exclamation-circle text-6xl mb-4"></i>
+                    <p>Failed to fetch repository info</p>
+                </div>
+            `;
+        }
+    }, 500));
+    
+    // Debounce function
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+</script>
+{% endblock %}

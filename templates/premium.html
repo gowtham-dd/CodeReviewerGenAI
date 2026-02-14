@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Premium Features - AI Code Reviewer{% endblock %}
+
+{% block content %}
+<div class="glass-morphism p-8">
+    <h1 class="text-4xl font-bold mb-4 gradient-text">🚀 Premium Features</h1>
+    <p class="text-xl text-gray-600 mb-8">Unlock the full power of AI code review</p>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        <div class="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition">
+            <div class="text-4xl text-indigo-600 mb-4">📊</div>
+            <h3 class="text-xl font-semibold mb-2">Readability Analysis</h3>
+            <p class="text-gray-600 mb-4">Get detailed scores on code style, naming conventions, and documentation quality.</p>
+            <div class="text-sm text-gray-500">Free version: Basic stats only</div>
+        </div>
+        
+        <div class="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition">
+            <div class="text-4xl text-indigo-600 mb-4">🔍</div>
+            <h3 class="text-xl font-semibold mb-2">20+ Edge Cases</h3>
+            <p class="text-gray-600 mb-4">Comprehensive testing with boundary values, invalid inputs, and stress tests.</p>
+            <div class="text-sm text-gray-500">Free version: 2 sample cases</div>
+        </div>
+        
+        <div class="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition">
+            <div class="text-4xl text-indigo-600 mb-4">🤖</div>
+            <h3 class="text-xl font-semibold mb-2">AI Summaries</h3>
+            <p class="text-gray-600 mb-4">Get intelligent optimization suggestions and improved code versions.</p>
+            <div class="text-sm text-gray-500">Free version: Basic feedback</div>
+        </div>
+    </div>
+    
+    <div class="text-center">
+        <h2 class="text-2xl font-bold mb-4">Coming Soon!</h2>
+        <p class="text-gray-600 mb-8">We're working hard to bring you these premium features.</p>
+        <button class="bg-indigo-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition" onclick="notifyMe()">
+            Notify Me When Available
+        </button>
+    </div>
+</div>
+
+<script>
+function notifyMe() {
+    alert("Thanks! We'll notify you when premium features launch.");
+}
+</script>
+{% endblock %}

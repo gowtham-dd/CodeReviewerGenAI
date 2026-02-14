@@ -1,0 +1,155 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.python-version
+*.pyc
+.pyc
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+*.py,cover
+
+# Virtual Environment
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+pythonenv*
+
+# Environment Variables
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+.flaskenv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.project
+.pydevproject
+.settings/
+*.sublime-*
+*.sublime-workspace
+
+# Flask
+instance/
+.webassets-cache
+.flask_session/
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Redis
+dump.rdb
+
+# Logs
+*.log
+*.log.*
+logs/
+log/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+*.sql
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+*.cache
+*.pid
+*.pid.lock
+
+# Uploads
+temp_repos/
+uploads/
+downloads/
+media/
+static/uploads/
+
+# Testing
+.cache/
+.pytest_cache/
+.coverage
+coverage.xml
+*.cover
+.hypothesis/
+.tox/
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.bak
+
+# Project specific
+active_reviews/
+*.pid
+*.sock
+
+# Docker
+.dockerignore
+Dockerfile
+docker-compose*.yml
+
+# Memory dumps
+*.dmp
+*.stackdump
+
+# Package manager locks (keep if you want to track, ignore if not)
+# package-lock.json
+# yarn.lock
+# Pipfile.lock
+
+# Secrets and keys
+*.pem
+*.key
+*.crt
+*.p12
+secrets/
