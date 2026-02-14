@@ -6,6 +6,12 @@
 ![LangChain](https://img.shields.io/badge/LangChain-0.1.0-blue)
 ![Groq](https://img.shields.io/badge/Groq-LLM-orange)
 
+## 📺 Watch the Demo
+
+[![AI Code Reviewer Demo](https://img.shields.io/badge/YouTube-Watch%20Demo-red)](https://youtu.be/YOUR_VIDEO_ID_HERE)
+
+Click the badge above or [watch this video](https://www.youtube.com/watch?v=bqSY-kNAABQ) to see the AI Code Reviewer in action!
+
 ## 📋 Table of Contents
 - [Overview](#-overview)
 - [System Architecture](#-system-architecture)
